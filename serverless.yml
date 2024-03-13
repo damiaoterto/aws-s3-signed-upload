@@ -1,0 +1,27 @@
+frameworkVersion: '3'
+useDotenv: true
+
+service: ${self:custom.service}
+
+custom:
+  stage: ${opt:stage, self:provider.stage}
+  service: 'SignedUpload'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+
+package:
+  individually: true
+
+plugins:
+  - serverless-offline
+
+functions:
+  createPresignedUrl:
+    handler: ./src/index.handlerCreateSignedUrl
+    events:
+      - http:
+          method: post
+          path: /presigned
+          cors: true
