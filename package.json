@@ -3,13 +3,13 @@
   "version": "1.0.0",
   "description": "A serverless function for signed uploads to S3 Bucket",
   "author": "Francisco Damião Terto <contato@damiaoterto.dev>",
+  "main": "src/index.js",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "directory": "https://github.com/damiaoterto/aws-s3-signed-upload.git"
   },
-  "license": "MIT",
-  "main": "src/index.js",
   "scripts": {
-    "test": "NODE_ENV=test node --test --inspect --watch src/index.js"
+    "test": "NODE_ENV=test node --test **/*.spec.js --inspect --watch"
   }
 }
