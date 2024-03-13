@@ -10,6 +10,10 @@
     "directory": "https://github.com/damiaoterto/aws-s3-signed-upload.git"
   },
   "scripts": {
+    "dev": "serverless offline -s dev --noTimeout",
     "test": "NODE_ENV=test node --test **/*.spec.js --inspect --watch"
+  },
+  "devDependencies": {
+    "serverless-offline": "^13.3.3"
   }
 }
