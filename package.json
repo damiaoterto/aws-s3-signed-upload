@@ -11,9 +11,13 @@
   },
   "scripts": {
     "dev": "serverless offline -s dev --noTimeout",
-    "test": "NODE_ENV=test node --test **/*.spec.js --inspect --watch"
+    "test:debug": "NODE_ENV=test node --test --inspect --watch **/*.spec.js",
+    "test": "NODE_ENV=test node --test **/*.spec.js"
   },
   "devDependencies": {
     "serverless-offline": "^13.3.3"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.533.0"
   }
 }
