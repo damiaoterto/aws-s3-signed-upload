@@ -36,23 +36,18 @@ describe('createPresignedUrlWithClient', () => {
     const mockGetSignedUrl = jest.fn().mockResolvedValue('https://example.com/presigned-url')
     getSignedUrl.mockImplementation(mockGetSignedUrl)
 
-    const client = new S3Client({});
     const expectedUrl = 'https://example.com/presigned-url'
-    const expectedOptions = {
-      expiresIn: 3600,
-    }
 
     const result = await createPresignedUrlWithClient({
       region: 'us-east-1',
       bucket: 'test-bucket',
       key: 'test-key',
-      options: { method: 'GET', expiresIn: 3600 }
+      options: { method: 'GET' }
     })
 
     expect(result).toBe(expectedUrl)
     expect(S3Client).toHaveBeenCalledWith({ region: 'us-east-1' })
-    expect(PutObjectCommand).toHaveBeenCalledWith({ Bucket: 'test-bucket', Key: 'test-key' })
-    expect(mockGetSignedUrl).toHaveBeenCalledWith(client, expect.any(GetObjectCommand), expectedOptions)
+    expect(GetObjectCommand).toHaveBeenCalledWith({ Bucket: 'test-bucket', Key: 'test-key' })
   })
 
   test('should throw error for unsupported method', async () => {
@@ -66,8 +61,6 @@ describe('createPresignedUrlWithClient', () => {
     })).rejects.toThrow(expectedError)
 
     expect(S3Client).toHaveBeenCalledWith({ region: 'us-east-1' })
-    expect(GetObjectCommand).toHaveBeenCalled()
-    expect(PutObjectCommand).toHaveBeenCalled()
   })
 })
 

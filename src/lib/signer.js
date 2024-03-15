@@ -11,15 +11,15 @@ const createPresignedUrlWithClient = async ({
   const client = new S3Client({ region })
 
   const command = {
-    'GET': new GetObjectCommand({ Bucket, Key }),
-    'PUT': new PutObjectCommand({ Bucket, Key }),
+    'GET': GetObjectCommand,
+    'PUT': PutObjectCommand,
   }
 
   if (!command[method]) {
     throw new Error(`Method '${method}' not implemented`)
   }
 
-  return getSignedUrl(client, command[method], {
+  return getSignedUrl(client, new command[method]({ Bucket, Key }), {
     expiresIn: options.expiresIn || 3600,
   })
 }
