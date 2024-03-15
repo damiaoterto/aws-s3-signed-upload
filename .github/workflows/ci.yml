@@ -1,13 +1,9 @@
 name: Application CI
 
-on:
-  pull_request:
-    branches:
-      - develop
-      - main
+on: ["push", "pull_request"]
 
 jobs:
-  ci:
+  test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -25,10 +21,10 @@ jobs:
       name: Install Dependencies
 
     - run: npm run test:cov
-      name: Test Coverage
+      name: Collect Coverage
 
     - name: Code Coverage Report
-      uses: coverallsapp/github-action@master
+      uses: coverallsapp/github-action@v2
       with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
+        flag-name: run-${{ join(matrix.*, '-') }}
 
