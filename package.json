@@ -11,9 +11,20 @@
   },
   "scripts": {
     "dev": "serverless offline -s dev --noTimeout",
-    "test": "NODE_ENV=test node --test **/*.spec.js --inspect --watch"
+    "test:debug": "NODE_ENV=test node --nolazy --inspect ./node_modules/jest/bin/jest.js --runInBand --colors --verbose --watch",
+    "test": "NODE_ENV=test jest",
+    "test:cov": "NODE_ENV=test jest --coverage"
   },
   "devDependencies": {
+    "@jest/globals": "^29.7.0",
+    "@types/jest": "^29.5.12",
+    "jest": "^29.7.0",
     "serverless-offline": "^13.3.3"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.533.0",
+    "@aws-sdk/credential-providers": "^3.533.0",
+    "@aws-sdk/s3-request-presigner": "^3.533.0",
+    "@aws-sdk/util-format-url": "^3.533.0"
   }
 }
