@@ -14,26 +14,21 @@ jobs:
         node-version: [20.x]
     steps:
     - uses: actions/checkout@v3
+
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
+
     - run: npm ci
       name: Install Dependencies
+
     - run: npm run test:cov
       name: Test Coverage
 
     - name: Code Coverage Report
-      uses: irongut/CodeCoverageSummary@v1.3.0
+      uses: coverallsapp/github-action@master
       with:
-        filename: coverage/clover.xml
-        badge: true
-        fail_below_min: true
-        format: markdown
-        hide_branch_rate: false
-        hide_complexity: true
-        indicators: true
-        output: both
-        thresholds: '60 80'
+        github-token: ${{ secrets.GITHUB_TOKEN }}
 
