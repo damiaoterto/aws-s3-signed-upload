@@ -1,25 +1,31 @@
 name: Application CI
 
-on:
-  pull_request:
-    branches:
-      - develop
-      - main
+on: ["pull_request"]
 
 jobs:
-  ci:
+  test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         node-version: [20.x]
     steps:
     - uses: actions/checkout@v3
+
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
+
     - run: npm ci
       name: Install Dependencies
+
     - run: npm run test:cov
-      name: Test Coverage
+      name: Collect Coverage
+
+    - name: Code Coverage Report
+      uses: coverallsapp/github-action@v2
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        flag-name: run-${{ join(matrix.*, '-') }}
+
