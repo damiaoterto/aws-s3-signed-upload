@@ -1,13 +1,15 @@
 name: Application CI
 
 on:
-  push:
-    branches: [ "main", "develop" ]
   pull_request:
-    branches: [ "main", "develop" ]
+    types:
+      - opened
+    branches:
+      - develop
+      - main
 
 jobs:
-  build:
+  ci:
     runs-on: ubuntu-latest
     strategy:
       matrix:
