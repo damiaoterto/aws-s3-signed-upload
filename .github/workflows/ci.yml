@@ -2,8 +2,6 @@ name: Application CI
 
 on:
   pull_request:
-    types:
-      - opened
     branches:
       - develop
       - main
