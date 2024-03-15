@@ -1,6 +1,6 @@
 name: Application CI
 
-on: ["push", "pull_request"]
+on: ["pull_request"]
 
 jobs:
   test:
@@ -26,5 +26,6 @@ jobs:
     - name: Code Coverage Report
       uses: coverallsapp/github-action@v2
       with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
         flag-name: run-${{ join(matrix.*, '-') }}
 
