@@ -26,6 +26,6 @@ jobs:
     - name: Code Coverage Report
       uses: coverallsapp/github-action@v2
       with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
+        github-token: ${{ secrets.GHP_TOKEN }}
         flag-name: run-${{ join(matrix.*, '-') }}
 
