@@ -1,11 +1,11 @@
-resource "aws_ssm_parameter" "galery-bucket-name" {
-  name = "${var.environment}-smart-gallery-bucket"
+resource "aws_ssm_parameter" "ssm-bucket-name" {
+  name = "${var.environment}-${var.app_name}-bucket"
   type = "String"
-  value = aws_s3_bucket.galery-bucket.name
+  value = aws_s3_bucket.app-bucket.bucket
 }
 
-resource "aws_ssm_parameter" "galery-bucket-arn" {
-  name = "${var.environment}-smart-gallery-arn"
+resource "aws_ssm_parameter" "ssm-bucket-arn" {
+  name = "${var.environment}-${var.app_name}-arn"
   type = "String"
-  value = aws_s3_bucket.galery-bucket.arn
+  value = aws_s3_bucket.app-bucket.arn
 }

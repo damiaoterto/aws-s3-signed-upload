@@ -1,3 +1,3 @@
-resource "aws_s3_bucket" "galery-bucket" {
-  bucket = "${var.environment}-smart-galery"
+resource "aws_s3_bucket" "app-bucket" {
+  bucket = "${var.environment}-${var.app_name}"
 }
