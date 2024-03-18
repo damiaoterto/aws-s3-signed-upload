@@ -46,5 +46,17 @@ jobs:
         working-directory: ${{ env.TF_WORK_DIR }}
         run: terraform plan -var environment=${{ env.ENV }} -var app_name=${{ env.APP }}
 
+      - name: Terraform Apply
+        working-directory: ${{ env.TF_WORK_DIR }}
+        run: terraform apply -auto-approve \
+          -var enviroment=${{ env.ENV }} \
+          -var app-name=${{ env.APP }} \
+          -backend-config="bucket=${{ env.TF_STATE_BUCKET }}" \
+          -backend-config="key=${{ env.TF_STATE_KEY }}" \
+          -backend-config="region=${{ env.AWS_REGION }}" \
+          -backend-config="encrypt=true"
+
+
+
 
 
