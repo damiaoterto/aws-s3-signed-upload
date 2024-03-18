@@ -76,7 +76,7 @@ jobs:
 
       - name: Download TF States
         uses: actions/download-artifact@v4
-        if: steps.check-artifact.outputs.exists
+        if: steps.check-artifact.outputs.exists == 'true'
         with:
           name: terraform-state
           path: ./terraform/terraform.tfstate
