@@ -78,6 +78,10 @@ jobs:
           name: terraform-state
           path: ${{ env.TF_STATE_PATH }}
 
+      - name: Terraform Init
+        working-directory: ${{ env.TF_WORK_DIR }}
+        run: terraform init
+
       - name: Terraform Apply
         working-directory: ${{ env.TF_WORK_DIR }}
         if: success()
