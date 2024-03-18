@@ -38,6 +38,12 @@ jobs:
         working-directory: ${{ env.TF_WORK_DIR }}
         run: terraform init
 
+      - name: Cache Terraform
+        uses: actions/cache@v4
+        with:
+          path: terraform/.terraform
+          key: terraform-$({{ hashFiles('**/*.tf') }})
+
       - name: Terraform Plan
         working-directory: ${{ env.TF_WORK_DIR }}
         run: terraform plan -var environment=${{ env.ENVIRONMENT }} -var app_name=${{ env.APP_NAME }}
@@ -78,9 +84,11 @@ jobs:
           name: terraform-state
           path: ${{ env.TF_STATE_PATH }}
 
-      - name: Terraform Init
-        working-directory: ${{ env.TF_WORK_DIR }}
-        run: terraform init
+      - name: Download Cache Terraform
+        uses: actions/cache@v4
+        with:
+          path: terraform/.terraform
+          key: terraform-$({{ hashFiles('**/*.tf') }})
 
       - name: Terraform Apply
         working-directory: ${{ env.TF_WORK_DIR }}
