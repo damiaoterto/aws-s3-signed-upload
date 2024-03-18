@@ -15,12 +15,15 @@ env:
   TF_WORK_DIR: ./terraform
 
 jobs:
-  plan:
+  deploy:
     runs-on: ubuntu-latest
     environment: develop
     env:
       ENV: ${{ vars.ENVIRONMENT }}
       APP: ${{ vars.APP_NAME }}
+      TF_STATE_BUCKET: ${{ vars.TF_STATE_S3_BUCKET }}
+      TF_STATE_KEY: ${{ vars.TF_STATE_S3_KEY }}
+
     steps:
       - uses: actions/checkout@v3
       - uses: hashicorp/setup-terraform@v3
@@ -33,60 +36,15 @@ jobs:
 
       - name: Terraform Init
         working-directory: ${{ env.TF_WORK_DIR }}
-        run: terraform init
+        run: terraform init \
+          -backend-config="bucket=${{ env.TF_STATE_BUCKET }}" \
+          -backend-config="key=${{ env.TF_STATE_S3_KEY }}" \
+          -backend-config="region=${{ env.AWS_REGION }}" \
+          -backend-config="encrypt=true"
 
       - name: Terraform Plan
         working-directory: ${{ env.TF_WORK_DIR }}
         run: terraform plan -var environment=${{ env.ENV }} -var app_name=${{ env.APP }}
 
-      - name: Terraform Cache
-        uses: actions/cache@v4
-        with:
-          path: ./terraform/.terraform
-          key: terraform-$({{ hashFiles('**/*.tf') }})
 
-  apply:
-    runs-on: ubuntu-latest
-    environment: develop
-    needs: plan
-    env:
-      ENV: ${{ vars.ENVIRONMENT }}
-      APP: ${{ vars.APP_NAME }}
-    steps:
-      - uses: actions/checkout@v3
-      - uses: hashicorp/setup-terraform@v3
 
-      - uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: ${{ env.AWS_REGION }}
-          aws-access-key-id: ${{ env.AWS_KEY_ID }}
-          aws-secret-access-key: ${{ env.AWS_SECRET_KEY }}
-
-      - name: Terraform Download Cache
-        uses: actions/cache@v4
-        with:
-          path: ./terraform/.terraform
-          key: terraform-$({{ hashFiles('**/*.tf') }})
-
-      - name: Check artifacts
-        uses: xSAVIKx/artifact-exists-action@v0
-        id: check-artifact
-        with:
-          name: "terraform-state"
-
-      - name: Download TF States
-        uses: actions/download-artifact@v4
-        if: steps.check-artifact.outputs.exists == 'true'
-        with:
-          name: terraform-state
-          path: ./terraform/terraform.tfstate
-
-      - name: Terraform Apply
-        working-directory: ${{ env.TF_WORK_DIR }}
-        run: terraform apply -auto-approve -var environment=${{ env.ENV }} -var app_name=${{ env.APP }}
-
-      - name: Upload TF States
-        uses: actions/upload-artifact@v4
-        with:
-          name: terraform-state
-          path: ./terraform/terraform.tfstate
