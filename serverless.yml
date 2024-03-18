@@ -9,7 +9,20 @@ custom:
 
 provider:
   name: aws
-  runtime: nodejs18.x
+  runtime: nodejs20.x
+
+  environment:
+    BUCKET_NAME: ${ssm:${self:custom.stage}-smart-gallery-bucket}
+
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - 's3:GetObject'
+            - 's3:PutObject'
+          Resource:
+            - ${ssm:${self.custom.stage}-smart-gallery-bucket}
 
 package:
   individually: true
