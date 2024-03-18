@@ -1,0 +1,89 @@
+name: TerraformDev
+
+on:
+  push:
+    branches: ["develop", "main"]
+  workflow_run:
+    workflows: ["CI"]
+
+env:
+  AWS_REGION: us-east-1
+  AWS_KEY_ID: ${{ secrets.AWS_KEY_ID }}
+  AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+  TF_STATE_PATH: terraform/terraform.tfstate
+
+jobs:
+  terraform-plan:
+    runs-on: ubuntu-latest
+    environment: develop
+    env:
+      ENVIRONMENT: ${{ vars.ENVIRONMENT }}
+      APP_NAME: ${{ vars.APP_NAME }}
+    steps:
+      - uses: actions/checkout@v4
+        name: Git Checkout
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        name: AWS Login
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          aws-access-key-id: ${{ env.AWS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_KEY }}
+
+      - uses: hashicorp/setup-terraform@v3
+        name: Terraform Setup
+
+      - name: Terraform Init
+        working-directory: ./terraform
+        run: terraform init
+
+      - name: Terraform Plan
+        working-directory: ./terraform
+        run: terraform plan -var environment=${{ env.ENVIRONMENT }} -var app_name=${{ env.APP_NAME }}
+
+  terraform-deploy:
+    runs-on: ubuntu-latest
+    environment: develop
+    env:
+      ENVIRONMENT: ${{ vars.ENVIRONMENT }}
+      APP_NAME: ${{ vars.APP_NAME }}
+    steps:
+      - uses: actions/checkout@v4
+        name: Git Checkout
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        name: AWS Login
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          aws-access-key-id: ${{ env.AWS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_KEY }}
+
+      - name: Check if Terraform state artifact exists
+        id: check_state
+        run: |
+          if test -e ${{ env.TF_STATE_PATH }}; then
+            echo "State file exists, proceeding with download"
+            echo "::set-output name=state_exists::true"
+          else
+            echo "State file does not exist yet"
+            echo "::set-output name=state_exists::false"
+          fi
+
+      - name: Download Terraform State
+        if: steps.check_state.outputs.state_exists == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: terraform-state
+          path: ${{ env.TF_STATE_PATH }}
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve -var environment=${{ env.ENVIRONMENT }} -var app_name=${{ env.APP_NAME }}
+
+      - name: Upload TF Stage Artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-state
+          path: ${{ env.TF_STATE_PATH }}
+
+
