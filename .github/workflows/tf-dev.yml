@@ -36,10 +36,10 @@ jobs:
 
       - name: Terraform Init
         working-directory: ${{ env.TF_WORK_DIR }}
-        run: terraform init \
-          -backend-config="bucket=${{ env.TF_STATE_BUCKET }}" \
-          -backend-config="key=${{ env.TF_STATE_KEY }}" \
-          -backend-config="region=${{ env.AWS_REGION }}" \
+        run: terraform init |
+          -backend-config="bucket=${{ env.TF_STATE_BUCKET }}" |
+          -backend-config="key=${{ env.TF_STATE_KEY }}" |
+          -backend-config="region=${{ env.AWS_REGION }}" |
           -backend-config="encrypt=true"
 
       - name: Terraform Plan
