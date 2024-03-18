@@ -77,6 +77,10 @@ jobs:
           name: terraform-state
           path: ${{ env.TF_STATE_PATH }}
 
+      - name: Terraform Init
+        working-directory: ./terraform
+        run: terraform init
+
       - name: Terraform Apply
         run: terraform apply -auto-approve -var environment=${{ env.ENVIRONMENT }} -var app_name=${{ env.APP_NAME }}
 
