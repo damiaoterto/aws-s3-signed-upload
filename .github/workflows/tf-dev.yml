@@ -5,6 +5,7 @@ on:
     branches: ["develop"]
   workflow_run:
     workflows: ["CI"]
+    types: completed
 
 env:
   AWS_REGION: us-east-1
@@ -14,100 +15,78 @@ env:
   TF_WORK_DIR: ./terraform
 
 jobs:
-  terraform-plan:
+  plan:
     runs-on: ubuntu-latest
     environment: develop
     env:
-      ENVIRONMENT: ${{ vars.ENVIRONMENT }}
-      APP_NAME: ${{ vars.APP_NAME }}
+      ENV: ${{ vars.ENVIRONMENT }}
+      APP: ${{ vars.APP_NAME }}
     steps:
-      - uses: actions/checkout@v4
-        name: Git Checkout
+      - uses: actions/checkout@v3
+      - uses: hashicorp/setup-terraform@v3
 
       - uses: aws-actions/configure-aws-credentials@v4
-        name: AWS Login
         with:
           aws-region: ${{ env.AWS_REGION }}
           aws-access-key-id: ${{ env.AWS_KEY_ID }}
           aws-secret-access-key: ${{ env.AWS_SECRET_KEY }}
-
-      - name: Check if Terraform state artifact exists
-        id: check_state
-        uses: xSAVIKx/artifact-exists-action@v0
-        with:
-          name: terraform-state
-
-      - name: Download Terraform State
-        if: steps.check_state.outputs.exists
-        uses: actions/download-artifact@v4
-        with:
-          name: terraform-state
-          path: ./terraform/
-
-      - uses: hashicorp/setup-terraform@v3
-        name: Terraform Setup
 
       - name: Terraform Init
         working-directory: ${{ env.TF_WORK_DIR }}
         run: terraform init
 
-      - name: Cache Terraform
-        uses: actions/cache@v4
-        with:
-          path: terraform/.terraform
-          key: terraform-$({{ hashFiles('**/*.tf') }})
-
       - name: Terraform Plan
         working-directory: ${{ env.TF_WORK_DIR }}
-        run: terraform plan -var environment=${{ env.ENVIRONMENT }} -var app_name=${{ env.APP_NAME }}
+        run: terraform plan -var environment=${{ env.ENV }} -var app_name=${{ env.APP }}
 
-  terraform-deploy:
+      - name: Terraform Cache
+        uses: actions/cache@v4
+        with:
+          path: ./terraform/.terraform
+          key: terraform-$({{ hashFiles('**/*.tf') }})
+
+  apply:
     runs-on: ubuntu-latest
     environment: develop
-    needs: terraform-plan
+    needs: plan
     env:
-      ENVIRONMENT: ${{ vars.ENVIRONMENT }}
-      APP_NAME: ${{ vars.APP_NAME }}
+      ENV: ${{ vars.ENVIRONMENT }}
+      APP: ${{ vars.APP_NAME }}
     steps:
-      - uses: actions/checkout@v4
-        name: Git Checkout
+      - uses: actions/checkout@v3
+      - uses: hashicorp/setup-terraform@v3
 
       - uses: aws-actions/configure-aws-credentials@v4
-        name: AWS Login
         with:
           aws-region: ${{ env.AWS_REGION }}
           aws-access-key-id: ${{ env.AWS_KEY_ID }}
           aws-secret-access-key: ${{ env.AWS_SECRET_KEY }}
 
-      - name: Check if Terraform state artifact exists
-        id: check_state
-        uses: xSAVIKx/artifact-exists-action@v0
-        with:
-          name: terraform-state
-
-      - name: Download Terraform State
-        if: steps.check_state.outputs.exists
-        uses: actions/download-artifact@v4
-        with:
-          name: terraform-state
-          path: ./terraform/
-
-      - name: Download Cache Terraform
+      - name: Terraform Download Cache
         uses: actions/cache@v4
         with:
-          path: terraform/.terraform
+          path: ./terraform/.terraform
           key: terraform-$({{ hashFiles('**/*.tf') }})
+
+      - name: Check artifacts
+        uses: xSAVIKx/artifact-exists-action@v0
+        id: check-artifact
+        with:
+          name: "terraform-state"
+
+      - name: Download TF States
+        uses: actions/download-artifact@v4
+        if: steps.check-artifact.outputs.exists
+        with:
+          name: terraform-state
+          path: ./terraform/terraform.tfstate
 
       - name: Terraform Apply
         working-directory: ${{ env.TF_WORK_DIR }}
-        if: success()
-        run: terraform apply -auto-approve -var environment=${{ env.ENVIRONMENT }} -var app_name=${{ env.APP_NAME }}
+        run: terraform apply -auto-approve -var environment=${{ env.ENV }} -var app_name=${{ env.APP }}
 
-      - name: Upload TF Stage Artifact
-        if: success()
+      - name: Upload TF States
         uses: actions/upload-artifact@v4
         with:
           name: terraform-state
-          path: ${{ env.TF_STATE_PATH }}
-
-
+          path: ./terraform/terraform.tfstate
