@@ -11,6 +11,7 @@ env:
   AWS_KEY_ID: ${{ secrets.AWS_KEY_ID }}
   AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
   TF_STATE_PATH: terraform/terraform.tfstate
+  TF_WORK_DIR: ./terraform
 
 jobs:
   terraform-plan:
@@ -34,11 +35,11 @@ jobs:
         name: Terraform Setup
 
       - name: Terraform Init
-        working-directory: ./terraform
+        working-directory: ${{ env.TF_WORK_DIR }}
         run: terraform init
 
       - name: Terraform Plan
-        working-directory: ./terraform
+        working-directory: ${{ env.TF_WORK_DIR }}
         run: terraform plan -var environment=${{ env.ENVIRONMENT }} -var app_name=${{ env.APP_NAME }}
 
   terraform-deploy:
@@ -77,11 +78,8 @@ jobs:
           name: terraform-state
           path: ${{ env.TF_STATE_PATH }}
 
-      - name: Terraform Init
-        working-directory: ./terraform
-        run: terraform init
-
       - name: Terraform Apply
+        working-directory: ${{ env.TF_WORK_DIR }}
         if: success()
         run: terraform apply -auto-approve -var environment=${{ env.ENVIRONMENT }} -var app_name=${{ env.APP_NAME }}
 
