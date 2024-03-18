@@ -1,0 +1,36 @@
+name: Terraform
+
+on:
+  push:
+    branches: ["develop", "main"]
+  workflow_run:
+    workflows: ["CI"]
+
+env:
+  AWS_REGION: us-east-1
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: aws-actions/configure-aws-credentials@v4
+        name: AWS Login
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          aws-access-key-id: ${{ secrets.AWS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+
+      - uses: hashicorp/setup-terraform@v3
+        name: Terraform Setup
+
+      - name: Terraform Init
+        working-directory: terraform/
+        run: terraform init
+
+      - name: Terraform Plan
+        working-directory: terraform/
+        run: terraform plan
+
+
+
+
