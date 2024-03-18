@@ -31,6 +31,19 @@ jobs:
           aws-access-key-id: ${{ env.AWS_KEY_ID }}
           aws-secret-access-key: ${{ env.AWS_SECRET_KEY }}
 
+      - name: Check if Terraform state artifact exists
+        id: check_state
+        uses: xSAVIKx/artifact-exists-action@v0
+        with:
+          name: terraform-state
+
+      - name: Download Terraform State
+        if: steps.check_state.outputs.exists
+        uses: actions/download-artifact@v4
+        with:
+          name: terraform-state
+          path: ./terraform/
+
       - uses: hashicorp/setup-terraform@v3
         name: Terraform Setup
 
@@ -77,7 +90,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: terraform-state
-          path: ${{ env.TF_STATE_PATH }}
+          path: ./terraform/
 
       - name: Download Cache Terraform
         uses: actions/cache@v4
