@@ -32,7 +32,7 @@ jobs:
 
       - name: Terraform Plan
         working-directory: ./terraform
-        run: terraform plan
+        run: terraform plan -var environment=dev -var app_name=smart_gallery
 
 
 
