@@ -10,8 +10,12 @@ env:
   AWS_REGION: us-east-1
 
 jobs:
-  plan:
+  development:
     runs-on: ubuntu-latest
+    environment: develop
+    env:
+      ENVIRONMENT: ${{ vars.ENVIRONMENT }}
+      APP_NAME: ${{ vars.APP_NAME }}
     steps:
       - uses: actions/checkout@v4
         name: Git Checkout
@@ -32,7 +36,7 @@ jobs:
 
       - name: Terraform Plan
         working-directory: ./terraform
-        run: terraform plan -var environment=dev -var app_name=smart_gallery
+        run: terraform plan -var environment=${{ env.ENVIRONMENT }} -var app_name=${{ env.APP_NAME }}
 
 
 
