@@ -13,6 +13,9 @@ jobs:
   plan:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+        name: Git Checkout
+
       - uses: aws-actions/configure-aws-credentials@v4
         name: AWS Login
         with:
