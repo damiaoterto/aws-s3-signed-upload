@@ -68,17 +68,12 @@ jobs:
 
       - name: Check if Terraform state artifact exists
         id: check_state
-        run: |
-          if test -e ${{ env.TF_STATE_PATH }}; then
-            echo "State file exists, proceeding with download"
-            echo "::set-output name=state_exists::true"
-          else
-            echo "State file does not exist yet"
-            echo "::set-output name=state_exists::false"
-          fi
+        uses: xSAVIKx/artifact-exists-action@v0
+        with:
+          name: terraform-state
 
       - name: Download Terraform State
-        if: steps.check_state.outputs.state_exists == 'true'
+        if: steps.check_state.outputs.exists
         uses: actions/download-artifact@v4
         with:
           name: terraform-state
