@@ -5,10 +5,9 @@ const createPresignedUrlWithClient = async ({
   region,
   bucket: Bucket,
   key: Key,
-  options = {},
-}) => {
+}, options = {}) => {
   const method = options.method || 'PUT'
-  const client = new S3Client({ region })
+  const client = new S3Client({ region: region })
 
   const command = {
     'GET': GetObjectCommand,

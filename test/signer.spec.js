@@ -42,8 +42,7 @@ describe('createPresignedUrlWithClient', () => {
       region: 'us-east-1',
       bucket: 'test-bucket',
       key: 'test-key',
-      options: { method: 'GET' }
-    })
+    }, { method: 'GET' })
 
     expect(result).toBe(expectedUrl)
     expect(S3Client).toHaveBeenCalledWith({ region: 'us-east-1' })
@@ -57,8 +56,7 @@ describe('createPresignedUrlWithClient', () => {
       region: 'us-east-1',
       bucket: 'test-bucket',
       key: 'test-key',
-      options: { method: 'DELETE' }
-    })).rejects.toThrow(expectedError)
+    }, { method: 'DELETE' })).rejects.toThrow(expectedError)
 
     expect(S3Client).toHaveBeenCalledWith({ region: 'us-east-1' })
   })
