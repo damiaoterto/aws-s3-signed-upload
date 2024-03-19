@@ -22,7 +22,7 @@ provider:
             - 's3:GetObject'
             - 's3:PutObject'
           Resource:
-            - ${ssm:${self.custom.stage}-smart-gallery-bucket}
+            - ${ssm:${self:custom.stage}-smart-gallery-arn}
 
 package:
   individually: true
